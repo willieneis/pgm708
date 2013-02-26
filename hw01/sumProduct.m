@@ -21,6 +21,9 @@ function marginalProb = sumProduct()
         0.0001,0.2499,0.75];
     % do sumProduct
     marginalProb = sumProd();
+    dlmwrite('gamma.txt',marginalProb');
+    plot(marginalProb');
+    legend('spring','summer','autumn','winter');
 
 
     function M = sumProd()

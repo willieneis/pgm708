@@ -30,7 +30,6 @@ function mostLikelySeq = sumProduct()
             [W,ind] = nextW(W,ind);
         end
         [todel,ind(:,end+1)] = max(W);
-        ind
     end
 
     function [mat,indMat] = nextW(mat,indMat)
