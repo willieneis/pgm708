@@ -1,0 +1,117 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,amsthm,amssymb,MnSymbol,enumerate,fullpage}
+\setlength{\parindent}{0in}
+
+\title{PGM 10-708: HW 2}
+\author{Willie Neiswanger\\
+\texttt{willie@cs.cmu.edu}}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+\section*{Problem 1}
+\label{sec:prob1}
+
+\subsection*{1.1}
+Let $\textbf{x} = (x_1,\ldots,x_p) \sim p(\textbf{x} | 0, \Sigma) = \text{Normal}(0,\Sigma)$, and $\Omega = \Sigma^{-1}$.
+
+\subsubsection*{1.1.a}
+Let $\textbf{x} = (\textbf{x}_1,\textbf{x}_2)$, where $\textbf{x}_1$ and $\textbf{x}_2$ form a partition of the $p$ variables, and 
+$(\textbf{x}_1,\textbf{x}_2) \sim 
+\text{Normal} \left( \left[ \begin{smallmatrix} \textbf{x}_1 \\ \textbf{x}_2 \end{smallmatrix} \right] | 0, \left[ \begin{smallmatrix} \Sigma_{1,1}& \Sigma_{1,2} \\ \Sigma_{2,1} & \Sigma_{2,2} \end{smallmatrix} \right] \right)$.
+Derive $p(\textbf{x}_1 | \textbf{x}_2)$.\\
+
+$p(\textbf{x}_1 | \textbf{x}_2)$ $=$ $\frac{p(\textbf{x}_1, \textbf{x}_2)}{p(\textbf{x}_2)}$
+
+\subsubsection*{1.1.b}
+We can write the precision matrix in block form as $\Omega = \left[ 
+\begin{smallmatrix} \Omega_{1,1} & \Omega_{1,2} \\ \Omega_{2,1} & \Omega_{2,2}
+\end{smallmatrix} \right]$.
+Derive $\text{Var}(\textbf{x}_1 | \textbf{x}_2)$ in terms of $\Omega$.
+
+\subsubsection*{1.1.c}
+Argue that $\Omega_{i,j}=0$ iff $x_i \upmodels x_j | \text{rest}$.\\
+
+Let $\textbf{x}_1 = (x_i,x_j)$ and $\textbf{x}_2 = \textbf{x}_{-(i,j)}$ (i.e. $\textbf{x}_2$ is all other $x_i$'s). Then, if $\Omega_{i,j} = 0$, 
+\\
+
+If $x_i \upmodels x_j | \text{rest}$ $\implies$ $p(\textbf{x}_1 | \textbf{x}_2) = p(x_i | \textbf{x}_2) p(x_j | \textbf{x}_2)$
+
+
+\subsection*{1.2}
+Let $\textbf{x}_1, \ldots, \textbf{x}_n$ $\sim$ $\text{Normal}(0,\Sigma)$, where $\textbf{x}_i = (x_i^1, \ldots x_i^p)$. Let $\Theta = \Sigma^{-1}$ and $S = \sum_i \frac{\textbf{x}_i \textbf{x}_i^\top}{n}$. Show that the log-likelihood of the multivariate Normal distribution to to be optimized is equal to $\text{log} \text{ det} \Theta - \text{tr}(S\Theta)$.
+\\
+
+
+$\text{log}(\text{Normal}(0,\Theta^{-1}))$ $=$ 
+$-\frac{p}{2}\text{log}(2\pi) - \frac{1}{2} \text{log} \text{ det}(\Theta^{-1}) - \frac{1}{2}\textbf{x}^{\top} \Theta \textbf{x}$ 
+$=$ 
+$-\frac{p}{2}\text{log}(2\pi) + \frac{1}{2} \text{log} \text{ det}(\Theta) - \frac{1}{2}$
+Optimizing this is therefore equivalent to optimizing $\text{log} \text{ det}(\Theta) - \text{tr}(S\Theta)$.
+
+
+\section*{Problem 2}
+\label{sec:prob2}
+
+\subsection*{2.1}
+The parameters of this model are $\theta$ (dimension $K$), $\sigma^2$ (dimension $K$), $\eta$ (a matrix of size $K \times K$), and $\gamma$ (dimension $K$).
+
+\subsection*{2.2}
+Write the expected conditional log-likelihood for data $(x_1,y_1),\ldots,(x_n,y_n)$.
+\\
+
+The conditional log-likelihood can be written
+\begin{equation}
+    \begin{split}
+        &\text{log}(P(\textbf{Y} | \textbf{X})) = \text{log} \left( \sum_{\textbf{Z}} P(\textbf{Y},\textbf{Z} | \textbf{X}) \right) \\
+        & = \text{log} \left( \prod_{i=1}^p \sum_{z_i}  e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
+        & = \sum_{i=1}^p \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
+        %&\sum_{i=2}^p \left( \gamma_{z_i}^{\top} x_i + \text{log}(\eta_{z_{i-1},z_i}) + 
+            %\text{log}(\text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2)) \right)
+    \end{split}
+\end{equation}
+Therefore, the expected conditional log-likelihood is 
+\begin{equation}
+    \begin{split}
+        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
+            = \sum_{i=1}^p \mathbb{E} \left[ \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right) \right] \\
+        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
+    \end{split}
+\end{equation}
+Using Jensen's inequality we can provide a lower bound to the above quantity with 
+\begin{equation}
+    \begin{split}
+        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2\\
+        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2
+    \end{split}
+\end{equation}
+
+\subsection*{2.3}
+Derive the update equations for the EM algorithm for this model.
+
+\section*{Problem 3}
+\label{sec:prob3}
+The KL divergence can be written 
+\begin{equation}
+    \begin{split}
+        &\text{KL}(P(x|\theta),P(x|\eta)) = \int \log\left(\frac{P(x|\theta)}{P(x|\eta)}\right)P(x|\theta) dx\\
+        & . \\
+        & . \\
+        & = \sum_{i=1}^k (\theta_i - \eta_i) \frac{\partial A(\theta)}{\partial \theta_i} - A(\theta) + A(\eta)
+    \end{split}
+\end{equation}
+
+
+\section*{Problem 4}
+\label{sec:prob4}
+
+The IPF update rule is: $\Psi_C(x_C)^{(t+1)} = \Psi_C(x_C)^{(t)} \frac{\tilde{p}(x_C)}{p^{(t)}(x_C)}$
+
+
+\end{document}
