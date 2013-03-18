@@ -24,7 +24,12 @@ $(\textbf{x}_1,\textbf{x}_2) \sim
 \text{Normal} \left( \left[ \begin{smallmatrix} \textbf{x}_1 \\ \textbf{x}_2 \end{smallmatrix} \right] | 0, \left[ \begin{smallmatrix} \Sigma_{1,1}& \Sigma_{1,2} \\ \Sigma_{2,1} & \Sigma_{2,2} \end{smallmatrix} \right] \right)$.
 Derive $p(\textbf{x}_1 | \textbf{x}_2)$.\\
 
-$p(\textbf{x}_1 | \textbf{x}_2)$ $=$ $\frac{p(\textbf{x}_1, \textbf{x}_2)}{p(\textbf{x}_2)}$
+\begin{equation*}
+    \begin{split}
+        p(\textbf{x}_1 | \textbf{x}_2) = \frac{p(\textbf{x}_1, \textbf{x}_2)}{p(\textbf{x}_2)}
+            = \frac{\text{Normal} \left( \left[ \begin{smallmatrix} \textbf{x}_1 \\ \textbf{x}_2 \end{smallmatrix} \right] | 0, \left[ \begin{smallmatrix} \Sigma_{1,1}& \Sigma_{1,2} \\ \Sigma_{2,1} & \Sigma_{2,2} \end{smallmatrix} \right] \right)}{p(\textbf{x}_2)}
+    \end{split}
+\end{equation*}
 
 \subsubsection*{1.1.b}
 We can write the precision matrix in block form as $\Omega = \left[ 
@@ -55,45 +60,104 @@ Optimizing this is therefore equivalent to optimizing $\text{log} \text{ det}(\T
 
 \section*{Problem 2}
 \label{sec:prob2}
+Assume, for simplicity, that we denote $P(z_1) = P(z_1 | z_0) = \eta_{z_0,z_1}$
 
 \subsection*{2.1}
 The parameters of this model are $\theta$ (dimension $K$), $\sigma^2$ (dimension $K$), $\eta$ (a matrix of size $K \times K$), and $\gamma$ (dimension $K$).
 
 \subsection*{2.2}
-Write the expected conditional log-likelihood for data $(x_1,y_1),\ldots,(x_n,y_n)$.
-\\
+%Write the expected conditional log-likelihood for data $(x_1,y_1),\ldots,(x_n,y_n)$.
+%\\
 
 The conditional log-likelihood can be written
-\begin{equation}
+\begin{equation*}
     \begin{split}
-        &\text{log}(P(\textbf{Y} | \textbf{X})) = \text{log} \left( \sum_{\textbf{Z}} P(\textbf{Y},\textbf{Z} | \textbf{X}) \right) \\
-        & = \text{log} \left( \prod_{i=1}^p \sum_{z_i}  e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
-            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
-        & = \sum_{i=1}^p \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
-            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
+        &\text{log}(P(\textbf{Y} | \textbf{X})) = \text{log} \left( \sum_{\textbf{Z}} P(\textbf{Y},\textbf{Z} | \textbf{X}) \right)
+             = \text{log} \left( \sum_{\textbf{Z}} P(\textbf{Z} | \textbf{X}) P(\textbf{Y} | \textbf{Z}, \textbf{X}) \right)\\
+        & =  \text{log} \left( \mathbb{E}_q \left[ P(\textbf{Z} | \textbf{X}) P(\textbf{Y} | \textbf{Z}, \textbf{X}) \frac{1}{q(\textbf{Z})} \right] \right)
+             \text{ \hspace{3mm}(for a distribution $q$ over $Z$)}\\
+        & \geq  \mathbb{E}_q \left[  \text{log} \left( P(\textbf{Z} | \textbf{X}) P(\textbf{Y} | \textbf{Z}, \textbf{X}) 
+            \frac{1}{q(\textbf{Z})} \right) \right]
+             \text{ \hspace{3mm}(using Jensen's inequality)}\\
+        & = \mathbb{E}_q \left[ \text{log} \left( P(\textbf{Z} | \textbf{X}) \right) \right] 
+             + \mathbb{E}_q \left[\text{log} \left( P(\textbf{Y} | \textbf{Z}, \textbf{X}) \right) \right] 
+             - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+        & = \mathbb{E}_q \left[ \sum_i \text{log} \left( P(z_i | z_{i-1}, x_i) \right)
+             + \sum_i \text{log} \left( P(y_i | z_i, x_i) \right) \right] 
+             - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+        & = \mathbb{E}_q \left[ \sum_i (\text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i )
+             + \sum_i \text{log} \left( \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right) \right] 
+             - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+        & = \mathbb{E}_q \left[ \sum_i \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right) \right]
+             - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+         & =  \sum_i \sum_{z_i} \sum_{z_{i-1}} \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right)
+             - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+        %
+        %
+        %& = \sum_i \left( \mathbb{E}_q\left[ \text{log}(\eta_{z_{i-1},z_i}) \right] + \mathbb{E}_q\left[ \gamma_{z_i}^{\top} x_i \right]
+             %-\frac{1}{2}\left( \text{log}(2\pi) - \mathbb{E}_q\left[ \text{log}(\sigma_{z_i}^2) \right] - 
+                %\mathbb{E}_q\left[ \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right] \right)  \right)
+             %- \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
+        %
+        %
+        %& = \text{log} \left( \prod_{i=1}^p \sum_{z_i}  e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            %\text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
+        %& = \sum_{i=1}^p \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            %\text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right)\\
         %&\sum_{i=2}^p \left( \gamma_{z_i}^{\top} x_i + \text{log}(\eta_{z_{i-1},z_i}) + 
             %\text{log}(\text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2)) \right)
     \end{split}
-\end{equation}
-Therefore, the expected conditional log-likelihood is 
-\begin{equation}
-    \begin{split}
-        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
-            = \sum_{i=1}^p \mathbb{E} \left[ \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
-            \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right) \right] \\
-        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
-    \end{split}
-\end{equation}
-Using Jensen's inequality we can provide a lower bound to the above quantity with 
-\begin{equation}
-    \begin{split}
-        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2\\
-        &\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2
-    \end{split}
-\end{equation}
+\end{equation*}
+This is the EM objective function; note that the second element of the final term is the entropy.\\
+%Therefore, the expected conditional log-likelihood is 
+%\begin{equation}
+    %\begin{split}
+        %&\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
+            %= \sum_{i=1}^p \mathbb{E} \left[ \text{log} \left( \sum_z e^{\gamma_{z_i}^{\top} x_i} \eta_{z_{i-1},z_i} 
+            %\text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right) \right] \\
+        %&\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right]
+    %\end{split}
+%\end{equation}
+%Using Jensen's inequality we can provide a lower bound to the above quantity with 
+%\begin{equation}
+    %\begin{split}
+        %&\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2\\
+        %&\mathbb{E} \left[ \text{log} (P(\textbf{Y} | \textbf{X})) \right] \leq 2
+    %\end{split}
+%\end{equation}
 
 \subsection*{2.3}
 Derive the update equations for the EM algorithm for this model.
+\\
+
+Let the EM object function above be written $\mathcal{L}(\theta,q)$, where $\theta$ are the model parameters and $q$ is the distribution over $\textbf{Z}$. For a certain version of EM, we can formulate the E-step as updating the distribution $q$ in the following way: 
+\begin{equation}
+    \begin{split}
+        & q^{(t+1)} = \text{argmax}_q \mathcal{L}(q,\theta^{(t)}) = P(\textbf{Z} | \textbf{Y}, \textbf{X}, \theta^{(t)})
+            = \frac{1}{K} P(\textbf{Y} | \textbf{Z}, \textbf{X}, \theta^{(t)}) P(\textbf{Z} | \textbf{X}, \theta^{(t)}) \\
+        & = \frac{1}{K} \prod_i P(y_i | x_i, z_i) \prod_i P(z_i | x_i, z_{i-1})
+            = \frac{1}{K} \prod_i \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2)  
+            \eta_{z_{i-1},z_i} e^{\gamma_{z_i}^{\top} x_i}
+    \end{split}
+\end{equation}
+where in this case the normalizing constant $K$ is computed by summing over the latent variables $\textbf{Z}$ in the numerator.
+\\
+
+And we can write the M-step as:
+\begin{equation}
+    \theta^{(t)} = \text{argmax}_{\theta} \mathcal{L}(q^{(t+1)},\theta)
+\end{equation}
+This involves maximizing the objective function 
+\begin{equation}
+    \begin{split}
+        & 2\sum_i \sum_{z_i} \sum_{z_{i-1}} \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right)
+    \end{split}
+\end{equation}
+with respect to the parameters $\eta_{z_{i-1},z_i}$, $\gamma_{z_i}$, $\theta_{z_i}$, and $\sigma_{z_i}^2$.
+
 
 \section*{Problem 3}
 \label{sec:prob3}
