@@ -1,0 +1,122 @@
+Notes for scribe:
+
+
+So far we've learned:
+    - exact inference algorithms
+
+approximate inference techniques
+    - variational techniques
+        - including: loopy belief propagation (usually converges, but may not converge)
+
+today we are doing another approx nference:
+    - stochastic simulation / sampling methods
+    - also today (later) Markov chain Monte Carlo methods
+
+
+- how to represent a join or a marginal distribution
+    - often we want to find marginal of a variable X, ie P(X)
+    - or perhaps we want the expectation or other moments
+        - sometimes we can write down the distribution and integrate exact to get, for e.g., expectation
+        - but often due to sophisticated distributions, solving exactly (ie integrating) is hard
+
+    - another major problem is that we just cannot write down or find (or know) an expression for P(X)
+
+    - monte carlo idea:
+        - instead of writing down P(X), somehow get samples x_1,...,x_n ~ p(X)
+        - then we cna plug in samples to estimate the expectation
+            - he wrote down E(f(X)) = \sum_n f(x_n) / N   <--- something like that. sample mean.
+            - "marginals and other expectations can be approx'd using sample based averages"
+
+- says these methods are "asymptotically exact" and easy to apply to arbitrary models
+- but practical challenges:
+    (1) how to draw samples from a given distribution
+    (2) how to make better use of samples (not all samples are equally important)
+    (3) how do we know when we've sampled enough?
+
+- first type of sampling: naive sampling
+    - alarm counting example
+    - naive sampling is following generative process to draw a sample over all variables in joint
+    - after sampling from joint he finds empirical conditional prob (by counting samples and applyin g Bayes rule)
+    - problem: what if you've only got a single sample for a given scenario... or even no samples for no scenarios?
+        - you just have biased distributions
+        - this is problem with naive siampling
+
+- other Monte Carlo methods we are going to study noext:
+    - direct sampling (shown above...difficult to  populate a high dimensional state space"
+    - reject sampling
+        "only count samples consistent with given evidences"
+    - likelihood weighting (importance sampling?)
+    -MCMC (MH, Gibbs)
+
+- Rejection sampling
+    - Suppose distro is \Pi(x) = \Pi'(x)/Z, and is difficult to sample from
+    - Sample from simpler distribution Q(X)
+        - ==> x ~ Q(X), and accept x w.p \Pi(X) / kQ(X) ... can tune k so that Pi(x)/kQ(X) \leq 1 ("to be valid distro")
+    - proof of correctness:
+        p(x) ~ 1/Z Q(X) \Pi'(x) / kQ(X) = \Pi'(x) /Z = P(X)
+    - pitfall / problem --- what if you have very high rejection rate? Need more samples for better approx
+        - and can't guarantee a high acceptance rate
+    - another (similar?) pitfall / problem
+        - assumine a normal distribution, d dim MVN.
+        - assume a normal proposal
+            - if the propsal exceeds true by 1%, and dim d=1000, optimal acceptance rate 
+                (called k, which is ratio of standar devs to the dth power) will be 1/20,000 
+                ---> need huge numbers of samples. Only accept once every 20,000th sample
+    - A technique to try and combat low acceptance rate: adaptive rejection samping
+        - do some sort of piecewise envelope to ad-hoc make Q close to P
+            - Q is some sort of mixture model --> is in use rarely, but sometimes in low-dim (1 or 2-d variables)
+
+- UNNORMALIZED Importance sampling
+    - suppose sampling from P is hard and it's easier to sample from propsal Q
+    - if Q "dominates" (uniformly bounds) P, then we cna sample from Q and reweight.
+    - then the expectation(f(X)) = 1/M sum_m f(x_m) w^m
+        - where x_m is sample from Q, and weight w_m = P(x_m)/Q(x_m)
+        - to get this, write out integral of expect(f(X)), multiple Q(X)/Q(X) inside, replace integral over Q with sum over samples from Q
+    - problems with this:
+        - tail regions, you have to suffer? (sim to rejection sampling?)
+        - need to compute P/Q ... but what if we don't know how to eval P?
+- NORMALIZED importance sampling
+    - suppose we can only eval P'(x) = Z*P(X) (e.g. something proportional to P)
+    - we can get around nasty normalizing constant Z
+        - let r(X) = P'(X)/Q(X) ==> expect_Q(r(X)) - \int P'/Q * Q dx = \int P'(x) dx = Z
+            - ==> Z - \int r(X)Q(x) dx [i think?]
+        - this implies: expect_P[f(X)] = \int f P dx = 1/Z \int f P'/Q * Q dx = \int f*r*Q dx / \int r*Q dx
+            approx equals sum_m f(x_m)r_m / \sum_m r_m   [is r_m equal to r(m)?]
+             = \sum_m f(x_m) w_m where w_m = r_m / \sum_m r_m  [weight is normalized empirical r value]
+- comparing normalized and unnormalized importance sampling:
+    - unnormalized importance sampling unbaised
+        - ie: E_Q[f(X)*w(X)] = \int f(x) w(x) Q(x) dx = \int f(x) P/Q * Q dx = \int f * P dx = E_P[ f(X) ]
+    - normalized importance sampling biased ("no free lunch" ie tradeoffs)
+        - ie: E_Q[f(x')*r(x') / r(x')] = \int f(x) Q(x) dx = E_Q [f(x)]  \neq! E_P [f(x)]  ==> biased!
+- as an example, we apply normalized importance sampling ("likelihood weighting") to a bayes net (discrete case)
+    - proposal Q gotten from the "mutilated BN where we clamp evidence nodes and cut their incoming arcs"
+    - the unnormalized posterior is P'(X) (or P'(x|e)?) \propto P(x,e) [joint]
+    - so we can plug in samples to estimate joint and marginal. He also has pseudocode for likelihood weighting.
+- efficiency of likelihood weighting
+    - he passed this
+
+- Weighted resampling
+    - one problem with importance sampling is that if P(x)f(x) is strongly varying 
+        and has a significant proportion of its mass concetrated in small region 
+        Then: r_m will be dominated by a few samples
+        - ie problems of degeneracy
+        - you can show with certain distributions samples will be very low variance
+        - so r might not be very accuracy if you naively use it as the weight (?)
+    - but there are two potential solutions
+        (1) choose a heavier tailed Q 
+        (2) weighted resampling (calls it here SIR - sequetial importance resampling)
+            - draw N samples from Q: X_1, ... , X_N
+            - construct weights w_1,...,w_N   =  r_m / sum_m r_m
+            - sub sample X_1,...,X_N with prob w_1, ..., w_N 
+    - leads to Particle Filtering (also known as sequential monte carlo SMC)
+        - want samples from P(X_t | Y_1:t)  [X are latent, Y observed]
+        - P(X_t | Y_1:t) = P(X_t | Y_t, Y_{1:t-1}) = 1/Z P(X_t|Y_1:t-1)*P(Y_t|X_t)
+            - thus: P(X_t | Y_1:t) represented by X_t^m ~ p(X_t | Y_1:t-1), with weights w_t^m = frac{}{} [check slides!]
+        - so this is a sequntial weighted resampler
+        - where
+            - P(X_t+1 | Y_1:t) = \int p(X_t+1 | X_t) * P(X_t | Y_1:t) dX_t = [empirical with samples] <-- called time update
+                = \sum_m w_t^m, P(X_t+1 | X_t^(m)) <-- called measurement reupdate
+    - PF often used in complex state space / dynamic models
+        - example: switching kalman filter
+            - so for each particle, gave intuition as to what is sampled and which kalman filter is chosen
+    - next time rao-backwellised sampling
