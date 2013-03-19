@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage{amsmath,amsthm,amssymb,MnSymbol,enumerate,fullpage}
+\usepackage{amsmath,amsthm,amssymb,MnSymbol,enumerate,fullpage,graphicx}
 \setlength{\parindent}{0in}
 
 \title{PGM 10-708: HW 2}
@@ -90,20 +90,33 @@ If $x_i \upmodels x_j | \text{rest}$ $\implies$ $p(\textbf{x}_1 | \textbf{x}_2) 
 
 
 \subsection*{1.2}
-Let $\textbf{x}_1, \ldots, \textbf{x}_n$ $\sim$ $\text{Normal}(0,\Sigma)$, where $\textbf{x}_i = (x_i^1, \ldots x_i^p)$. Let $\Theta = \Sigma^{-1}$ and $S = \sum_i \frac{\textbf{x}_i \textbf{x}_i^\top}{n}$. Show that the log-likelihood of the multivariate Normal distribution to to be optimized is equal to $\text{log} \text{ det} \Theta - \text{tr}(S\Theta)$.
-\\
+Let $\textbf{x}_1, \ldots, \textbf{x}_n$ $\sim$ $\text{Normal}(0,\Sigma)$, where $\textbf{x}_i = (x_i^1, \ldots x_i^p)$. Let $\Theta = \Sigma^{-1}$ and $S = \sum_i \frac{\textbf{x}_i \textbf{x}_i^\top}{n}$. Show that the log-likelihood of the multivariate Normal distribution to to be optimized is equal to $\text{log} \text{ det} \Theta - \text{tr}(S\Theta)$.\\
 
-$\text{log}(\text{Normal}(0,\Theta^{-1}))$ $=$ 
-$-\frac{p}{2}\text{log}(2\pi) - \frac{1}{2} \text{log} \text{ det}(\Theta^{-1}) - \frac{1}{2}\textbf{x}^{\top} \Theta \textbf{x}$ 
-$=$ 
-$-\frac{p}{2}\text{log}(2\pi) + \frac{1}{2} \text{log} \text{ det}(\Theta) - \frac{1}{2}$
-Optimizing this is therefore equivalent to optimizing $\text{log} \text{ det}(\Theta) - \text{tr}(S\Theta)$.
+This holds because 
+\begin{equation}
+    \begin{split}
+        \text{log} \left( \prod_i \text{Normal}(\textbf{x}_i | 0,\Theta^{-1}) \right) 
+        &= -\frac{np}{2}\text{log}(2\pi) - \frac{n}{2} \text{log} \text{ det}(\Theta^{-1}) - \frac{1}{2} \sum_i \textbf{x}_i^{\top} \Theta \textbf{x}_i\\
+        &= -\frac{np}{2}\text{log}(2\pi) + \frac{n}{2} \text{log} \text{ det}(\Theta) - \frac{1}{2} \sum_i \textbf{x}_i^{\top} \Theta \textbf{x}_i
+    \end{split}
+\end{equation}
+Considering only terms that include the parameter and disregarding coefficients, we can see that optimizing the above expression is therefore equivalent to (i.e. can be achieved by) optimizing $\text{log} \text{ det}(\Theta) - \text{tr}(S\Theta)$.
 
 
 \subsection*{1.3}
-Implement the Meinshausen-Buhlmann and Glasso algorithms.
+Implement the Meinshausen-Buhlmann and Glasso algorithms.\\
 
-The estimated precision matrices are drawn below. It seems that the estimated precision matrices become more sparse as the lambda parameter is increased.
+The estimated precision matrices are drawn below (where white elements in the adjacency matrix imply edges and black implies no edges). It seems that the estimated precision matrices become more sparse as the lambda parameter is increased.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{precImg/mbPrec.pdf}
+    \caption{MB algorithm results for $\lambda = [0,20,30,40]$.}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{precImg/glPrec.pdf}
+    \caption{Glasso algorithm results for $\lambda = [0,0.2,0.5,0.8]$.}
+\end{figure}
 
 
 
