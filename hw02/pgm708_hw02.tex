@@ -132,7 +132,7 @@ The parameters of this model are $\theta$ (dimension $K$), $\sigma^2$ (dimension
 %Write the expected conditional log-likelihood for data $(x_1,y_1),\ldots,(x_n,y_n)$.
 %\\
 
-The conditional log-likelihood can be written
+The conditional log-likelihood can be written and lower bounded by the following:
 \begin{equation*}
     \begin{split}
         &\text{log}(P(\textbf{Y} | \textbf{X})) = \text{log} \left( \sum_{\textbf{Z}} P(\textbf{Y},\textbf{Z} | \textbf{X}) \right)
@@ -152,7 +152,7 @@ The conditional log-likelihood can be written
              + \sum_i \text{log} \left( \text{Normal}(y_i | \theta_{z_i}^{\top} x_i, \sigma_{z_i}^2) \right) \right] 
              - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
         & = \mathbb{E}_q \left[ \sum_i \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
-             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right) \right]
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i - \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right) \right]
              - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
          %& =  \sum_i \sum_{z_i} \sum_{z_{i-1}} \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
              %-\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right)
@@ -200,10 +200,10 @@ We first write the EM objective as
 \begin{equation}
     \begin{split}
         &= \mathbb{E}_q \left[ \sum_i \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
-             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right) \right]
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i - \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right) \right]
              - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
          &=  \sum_i \sum_{z_i} \sum_{z_{i-1}} \left( \text{log}(\eta_{z_{i-1},z_i}) + \gamma_{z_i}^{\top} x_i 
-             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i | \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right)
+             -\frac{1}{2}\left( \text{log}(2\pi) - \text{log}(\sigma_{z_i}^2) - \frac{(y_i - \theta_{z_i}^{\top} x_i)^2}{ \sigma_{z_i}^2} \right)  \right)
              - \mathbb{E}_q \left[\text{log} \left( q(\textbf{Z}) \right) \right] \\
     \end{split}
 \end{equation}
@@ -233,6 +233,8 @@ This involves maximizing the objective function
     \end{split}
 \end{equation}
 with respect to the parameters $\eta_{z_{i-1},z_i}$, $\gamma_{z_i}$, $\theta_{z_i}$, and $\sigma_{z_i}^2$.
+By taking the gradient of the EM objective function with respect to each parameter, setting it to zero, and solving.
+Solving for each gradient is omitted due to time constraints $\ddot\frown$.
 
 
 \section*{Problem 3}
