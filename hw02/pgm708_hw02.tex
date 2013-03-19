@@ -132,7 +132,7 @@ This is the EM objective function; note that the second element of the final ter
 Derive the update equations for the EM algorithm for this model.
 \\
 
-Let the EM object function above be written $\mathcal{L}(\theta,q)$, where $\theta$ are the model parameters and $q$ is the distribution over $\textbf{Z}$. For a certain version of EM, we can formulate the E-step as updating the distribution $q$ in the following way: 
+Let the EM object function above be written $\mathcal{L}(\theta,q)$, where $\theta$ are the model parameters and $q$ is the distribution over $\textbf{Z}$. For a version of EM, we can formulate the E-step as updating the distribution $q$ in the following way: 
 \begin{equation}
     \begin{split}
         & q^{(t+1)} = \text{argmax}_q \mathcal{L}(q,\theta^{(t)}) = P(\textbf{Z} | \textbf{Y}, \textbf{X}, \theta^{(t)})
