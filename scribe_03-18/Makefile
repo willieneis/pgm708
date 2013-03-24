@@ -1,8 +1,8 @@
 main.pdf: main.tex
 	pdflatex $<
-	bibtex main 
+	#bibtex main 
 	pdflatex $<
-	pdflatex $<
+	#pdflatex $<
 
 clean:
 	rm -f main.aux
